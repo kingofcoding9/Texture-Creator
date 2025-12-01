@@ -6,22 +6,32 @@
     <title>Smart Wireframe Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; 
+            background-color: #0f172a; 
+        }
+
         .checkerboard {
-            background-color: #1a1a1a;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0.3;
+            pointer-events: none;
             background-image:
-              linear-gradient(45deg, #222 25%, transparent 25%),
-              linear-gradient(-45deg, #222 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #222 75%),
-              linear-gradient(-45deg, transparent 75%, #222 75%);
+              linear-gradient(45deg, #1e293b 25%, transparent 25%),
+              linear-gradient(-45deg, #1e293b 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, #1e293b 75%),
+              linear-gradient(-45deg, transparent 75%, #1e293b 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
-        .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         
         canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
             cursor: grab;
         }
         canvas:active {
@@ -31,129 +41,128 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans flex flex-col">
 
-    <div class="container mx-auto p-6 max-w-6xl flex-grow">
-        <header class="mb-10 text-center">
-            <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 mb-4">Smart Wireframe Generator</h1>
-            <p class="text-gray-400 text-lg">Intelligent UV Mapping & High-Res Texture Generation</p>
+    <div class="container mx-auto p-6 max-w-6xl flex-grow flex flex-col h-screen">
+        <header class="mb-6 text-center flex-none">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 mb-2">Smart Wireframe Generator</h1>
+            <p class="text-gray-400 text-sm">Intelligent UV Mapping & High-Res Texture Generation</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start flex-grow overflow-hidden">
             
             <!-- Controls -->
-            <div class="lg:col-span-4 space-y-8">
+            <div class="lg:col-span-4 space-y-6 overflow-y-auto max-h-full pr-2 custom-scrollbar">
                 
                 <!-- Upload -->
-                <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
+                <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
                     <div class="flex items-center justify-between mb-4">
-                        <label class="text-lg font-bold text-blue-300">1. Upload Model</label>
+                        <label class="text-base font-bold text-blue-300">1. Upload Model</label>
                         <span id="statusBadge" class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500 bg-gray-900 rounded">Waiting</span>
                     </div>
                     
                     <div class="relative group">
                         <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg blur opacity-20 group-hover:opacity-50 transition duration-200"></div>
-                        <div class="relative border-2 border-dashed border-gray-600 bg-gray-800 rounded-lg p-8 text-center hover:bg-gray-750 transition-colors cursor-pointer" onclick="document.getElementById('fileInput').click()">
+                        <div class="relative border-2 border-dashed border-gray-600 bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-750 transition-colors cursor-pointer" onclick="document.getElementById('fileInput').click()">
                             <div class="space-y-2">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
-                                <p class="text-gray-300 text-sm font-medium" id="fileNameDisplay">Drop .geo.json or .bbmodel here</p>
+                                <p class="text-gray-300 text-xs font-medium" id="fileNameDisplay">Drop .geo.json here</p>
                             </div>
                             <input type="file" id="fileInput" accept=".bbmodel,.obj,.json,.txt" class="hidden" onchange="handleFileSelect(event)">
                         </div>
                     </div>
                     <div id="fileInfo" class="mt-4 p-3 bg-gray-900 rounded text-xs text-gray-400 hidden">
                         <div class="flex justify-between"><span>Type:</span> <span id="fileTypeVal" class="text-white"></span></div>
-                        <div class="flex justify-between"><span>File Header Res:</span> <span id="fileResVal" class="text-white"></span></div>
+                        <div class="flex justify-between"><span>Generated Res:</span> <span id="fileResVal" class="text-white"></span></div>
                     </div>
                 </div>
 
                 <!-- Settings Panel -->
                 <div id="actionPanel" class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 opacity-50 pointer-events-none transition-all duration-300">
-                    <label class="block text-lg font-bold mb-4 text-indigo-300">2. Settings</label>
+                    <label class="block text-base font-bold mb-4 text-indigo-300">2. Settings</label>
                     
                     <!-- Target Resolution -->
-                    <div class="mb-3">
-                        <label class="text-xs text-gray-300 block mb-1">Target Output Resolution (Quality)</label>
-                        <select id="targetResInput" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
-                            <option value="512">512 x 512 (Standard)</option>
-                            <option value="1024">1024 x 1024 (HD)</option>
+                    <div class="mb-4">
+                        <label class="text-xs text-gray-300 block mb-1">Target Output Resolution</label>
+                        <select id="targetResInput" class="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" onchange="regenerateLayout()">
+                            <option value="512">512 x 512</option>
+                            <option value="1024">1024 x 1024</option>
                             <option value="2048" selected>2048 x 2048 (2K)</option>
                             <option value="4096">4096 x 4096 (4K)</option>
                         </select>
                     </div>
                     
-                    <!-- Resolution Correction -->
+                    <!-- Scale Controls -->
                     <div class="bg-indigo-900/30 p-3 rounded mb-4 border border-indigo-500/50">
-                        <label class="text-xs text-indigo-200 font-bold block mb-1">Source UV Grid (From File)</label>
-                        <p class="text-[10px] text-gray-400 mb-2">Original resolution defined in file. <span class="text-green-400">Scale is 1:1 (Raw). Use slider to resize.</span></p>
-                        <div class="flex gap-2 mb-2">
-                             <input type="number" id="sourceWInput" class="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs text-white" value="0" oninput="requestRedraw()">
-                             <span class="text-gray-500 self-center">x</span>
-                             <input type="number" id="sourceHInput" class="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs text-white" value="0" oninput="requestRedraw()">
-                        </div>
+                        <label class="text-xs text-indigo-200 font-bold block mb-1">Scale & Layout</label>
                         
-                        <!-- Manual Scale Slider -->
-                        <div class="mt-3 mb-2">
-                             <label class="text-[10px] text-indigo-200 font-bold block mb-1 flex justify-between">
-                                <span>Manual Scale Multiplier</span>
-                                <span id="scaleMultDisplay" class="text-white">1.00x</span>
+                        <!-- Content Scale Slider -->
+                        <div class="mb-3">
+                             <label class="text-[10px] text-indigo-200 block mb-1 flex justify-between">
+                                <span>Density (Fill Amount)</span>
+                                <span id="contentScaleDisplay" class="text-white text-xs font-mono">1.00x</span>
                             </label>
-                            <input type="range" id="manualScaleInput" min="0.1" max="2.0" step="0.01" value="1.0" class="w-full accent-indigo-500" oninput="updateScaleDisplay(); requestRedraw()">
+                            <input type="range" id="contentScaleInput" min="0.1" max="2.0" step="0.01" value="1.0" class="w-full accent-indigo-500" oninput="updateContentScale(); regenerateLayout()">
                         </div>
 
-                        <!-- Info: Drag Instructions -->
-                        <div class="mt-2 p-2 bg-black/40 rounded text-[10px] text-gray-400 flex flex-col gap-1">
-                            <div class="flex justify-between"><span class="font-bold text-indigo-400">OFFSET X:</span> <span id="offsetXDisplay" class="font-mono text-white">0%</span></div>
-                            <div class="flex justify-between"><span class="font-bold text-indigo-400">OFFSET Y:</span> <span id="offsetYDisplay" class="font-mono text-white">0%</span></div>
-                            <div class="text-center italic mt-1 text-gray-500">Drag wireframe on preview to move</div>
+                        <!-- View Zoom -->
+                        <div class="flex gap-2 items-center mb-2">
+                             <span class="text-[10px] text-gray-400">View Zoom:</span>
+                             <span id="scaleMultDisplay" class="text-white text-xs font-mono w-10">1.00x</span>
+                             <input type="range" id="manualScaleInput" min="0.1" max="5.0" step="0.01" value="1.0" class="flex-1 accent-gray-500" oninput="updateViewScale(); requestRedraw()">
                         </div>
+                        <button onclick="autoFitView()" class="w-full py-1.5 text-[10px] font-bold uppercase tracking-wider bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors shadow">
+                            Reset View (Center)
+                        </button>
                     </div>
                     
                     <!-- Background & Lines -->
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="text-xs text-gray-400 block mb-1">Background Opacity</label>
-                            <input type="range" id="bgOpacity" min="0" max="1" step="0.1" value="0" class="w-full accent-indigo-500">
+                            <label class="text-xs text-gray-400 block mb-1">Bg Opacity</label>
+                            <input type="range" id="bgOpacity" min="0" max="1" step="0.1" value="0.2" class="w-full accent-indigo-500" oninput="requestRedraw()">
                         </div>
                         <div>
                             <label class="text-xs text-gray-400 block mb-1">Line Width</label>
-                            <input type="range" id="lineWidthMult" min="0.1" max="3" step="0.1" value="1.0" class="w-full accent-indigo-500" oninput="requestRedraw()">
+                            <input type="range" id="lineWidthMult" min="0.1" max="10" step="0.1" value="3.0" class="w-full accent-indigo-500" oninput="requestRedraw()">
                         </div>
-                         <div>
-                            <label class="text-xs text-gray-400 block mb-1">Line Color</label>
-                            <input type="color" id="strokeColor" value="#38bdf8" class="w-full h-8 bg-gray-900 border border-gray-600 rounded cursor-pointer" oninput="requestRedraw()">
-                        </div>
-                         <div class="flex items-center h-full pt-4">
-                             <input type="checkbox" id="fixInvertedCheckbox" class="w-5 h-5 text-indigo-600 bg-gray-700 border-gray-500 rounded focus:ring-indigo-500" onchange="requestRedraw()">
-                            <label for="fixInvertedCheckbox" class="ml-2 text-xs text-gray-300 cursor-pointer select-none font-bold">Flip V (OpenGL)</label>
+                         <div class="col-span-2 flex items-center justify-between">
+                             <div class="flex items-center">
+                                <label class="text-xs text-gray-400 mr-2">Color</label>
+                                <input type="color" id="strokeColor" value="#38bdf8" class="h-6 w-8 bg-gray-900 border border-gray-600 rounded cursor-pointer" oninput="requestRedraw()">
+                             </div>
+                             <div class="flex items-center">
+                                 <input type="checkbox" id="fixInvertedCheckbox" class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-500 rounded focus:ring-indigo-500" onchange="requestRedraw()">
+                                <label for="fixInvertedCheckbox" class="ml-2 text-xs text-gray-300 font-bold select-none">Flip V</label>
+                             </div>
                         </div>
                     </div>
 
-
-                    <button onclick="generateSmartWireframe()" class="w-full group relative flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg transform transition hover:-translate-y-0.5">
-                        Download Smart Assets
+                    <button onclick="downloadFiles()" class="w-full group relative flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg transform transition hover:-translate-y-0.5">
+                        Download Result
                     </button>
-                </div>
-
-                <!-- Logs -->
-                <div class="bg-black/30 p-4 rounded-lg border border-gray-800">
-                    <div class="text-[10px] font-mono text-gray-500 uppercase mb-2">System Log</div>
-                    <div id="debugLog" class="font-mono text-xs text-green-500/80 h-24 overflow-y-auto whitespace-pre-wrap">Waiting...</div>
                 </div>
             </div>
 
             <!-- Preview -->
-            <div class="lg:col-span-8 h-[600px] bg-gray-800 rounded-xl shadow-2xl border border-gray-700 flex flex-col overflow-hidden relative">
-                 <div class="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur px-3 py-1 rounded text-xs text-white border border-white/10 pointer-events-none">
-                    Preview Mode (Drag to Move)
+            <div class="lg:col-span-8 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 flex flex-col overflow-hidden relative h-[600px] lg:h-full">
+                 <div class="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur px-3 py-1 rounded text-xs text-white border border-white/10 pointer-events-none select-none">
+                    Drag to Pan • Scroll to Zoom
                 </div>
-                <div class="flex-1 overflow-auto relative custom-scrollbar flex items-center justify-center bg-gray-900">
-                    <div class="checkerboard absolute inset-0 z-0 opacity-50 pointer-events-none"></div>
-                    <canvas id="textureCanvas" class="relative z-10 shadow-2xl max-w-none"></canvas>
-                    <div id="placeholderText" class="absolute z-20 inset-0 flex flex-col items-center justify-center text-gray-600 pointer-events-none">
+                
+                <div id="canvasContainer" class="canvas-container">
+                    <div class="checkerboard"></div>
+                    <canvas id="textureCanvas"></canvas>
+                    
+                    <div id="placeholderText" class="absolute inset-0 flex flex-col items-center justify-center text-gray-600 pointer-events-none z-10">
                         <svg class="w-16 h-16 mb-4 opacity-20" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg>
                         <span>No Model Loaded</span>
                     </div>
+                </div>
+                
+                <!-- System Log -->
+                <div class="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur p-2 border-t border-gray-700">
+                     <div id="debugLog" class="font-mono text-[10px] text-green-500/90 h-12 overflow-y-auto whitespace-pre-wrap">Waiting...</div>
                 </div>
             </div>
         </div>
@@ -163,27 +172,23 @@
     <canvas id="highResCanvas" style="display:none;"></canvas>
 
     <script>
-        // --- CONFIGURATION ---
-        const SETTINGS = {
-            defaultRes: 16
-        };
+        const SETTINGS = { defaultRes: 16 };
 
-        // --- STATE ---
         let appState = {
-            fileContent: null,
+            originalJson: null, 
+            activeJson: null,   
             fileType: null,
-            sourceRes: { w: 64, h: 64 },
-            hasMesh: false,
-            fileName: '',
-            // Offsets are stored as Percentage (0.0 - 1.0)
-            offsetX: 0.0,
-            offsetY: 0.0, // Default to 0 (No offset)
+            sourceRes: { w: 64, h: 64 }, 
+            viewX: 0, viewY: 0, scale: 1.0, 
             isDragging: false,
-            lastMouse: { x: 0, y: 0 }
+            lastMouse: { x: 0, y: 0 },
+            fileName: '',
+            contentScale: 1.0,
+            activeGeoIndex: 0 
         };
 
-        // --- DOM ELEMENTS ---
         const dom = {
+            container: document.getElementById('canvasContainer'),
             canvas: document.getElementById('textureCanvas'),
             ctx: document.getElementById('textureCanvas').getContext('2d'),
             hrCanvas: document.getElementById('highResCanvas'),
@@ -198,174 +203,485 @@
             },
             inputs: {
                 flip: document.getElementById('fixInvertedCheckbox'),
-                srcW: document.getElementById('sourceWInput'),
-                srcH: document.getElementById('sourceHInput'),
                 targetRes: document.getElementById('targetResInput'),
                 bgOpacity: document.getElementById('bgOpacity'),
                 lineWidthMult: document.getElementById('lineWidthMult'),
-                manualScale: document.getElementById('manualScaleInput'),
+                manualScale: document.getElementById('manualScaleInput'), 
+                contentScale: document.getElementById('contentScaleInput'),
                 color: document.getElementById('strokeColor')
             },
             displays: {
                 scale: document.getElementById('scaleMultDisplay'),
-                offX: document.getElementById('offsetXDisplay'),
-                offY: document.getElementById('offsetYDisplay')
+                contentScale: document.getElementById('contentScaleDisplay')
             }
         };
 
-        // --- UTILS ---
-        function nextPowerOfTwo(n) {
-            if (n === 0) return 1;
-            n--;
-            n |= n >> 1;
-            n |= n >> 2;
-            n |= n >> 4;
-            n |= n >> 8;
-            n |= n >> 16;
-            return n + 1;
-        }
-
-        function log(msg) {
-            const time = new Date().toLocaleTimeString('en-US', {hour12: false, hour: "numeric", minute: "numeric", second: "numeric"});
-            dom.log.innerHTML += `[${time}] ${msg}\n`;
+        function log(msg) { 
+            dom.log.innerHTML += `> ${msg}\n`; 
             dom.log.scrollTop = dom.log.scrollHeight;
         }
-
-        function clearLog() {
-            dom.log.textContent = '';
+        function clearLog() { dom.log.innerHTML = ''; }
+        
+        function updateViewScale() {
+            if(dom.displays.scale) dom.displays.scale.textContent = parseFloat(dom.inputs.manualScale.value).toFixed(2) + 'x';
+        }
+        
+        function updateContentScale() {
+            appState.contentScale = parseFloat(dom.inputs.contentScale.value);
+            if(dom.displays.contentScale) dom.displays.contentScale.textContent = appState.contentScale.toFixed(2) + 'x';
         }
 
-        function updateScaleDisplay() {
-            dom.displays.scale.textContent = parseFloat(dom.inputs.manualScale.value).toFixed(2) + 'x';
+        function resizeCanvas() {
+            if (!dom.container) return;
+            const rect = dom.container.getBoundingClientRect();
+            dom.canvas.width = rect.width;
+            dom.canvas.height = rect.height;
+            requestRedraw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 100);
+
+        // --- CORE: VECTOR MATH & PROJECTION ---
+        function getNormal(positions) {
+            if(positions.length < 3) return [0,1,0];
+            const p0 = positions[0], p1 = positions[1], p2 = positions[2];
+            const v10 = [p1[0]-p0[0], p1[1]-p0[1], p1[2]-p0[2]];
+            const v20 = [p2[0]-p0[0], p2[1]-p0[1], p2[2]-p0[2]];
+            let nx = v10[1]*v20[2] - v10[2]*v20[1];
+            let ny = v10[2]*v20[0] - v10[0]*v20[2];
+            let nz = v10[0]*v20[1] - v10[1]*v20[0];
+            const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+            if(len < 0.0001) return [0,1,0];
+            return [nx/len, ny/len, nz/len];
         }
 
-        function updateOffsetDisplays() {
-            dom.displays.offX.textContent = (appState.offsetX * 100).toFixed(1) + '%';
-            dom.displays.offY.textContent = (appState.offsetY * 100).toFixed(1) + '%';
+        // Project 3D points onto a 2D plane defined by Normal
+        function projectToPlane(points, normal) {
+            // Pick axis system based on normal
+            // If Normal is mostly Y, use XZ plane.
+            // If Normal is mostly X, use YZ plane.
+            // If Normal is mostly Z, use XY plane.
+            
+            const ax = Math.abs(normal[0]);
+            const ay = Math.abs(normal[1]);
+            const az = Math.abs(normal[2]);
+            
+            let uAxis, vAxis;
+            
+            if (ay > ax && ay > az) {
+                // Top/Bottom projection -> Use X and Z
+                uAxis = 0; vAxis = 2;
+            } else if (ax > ay && ax > az) {
+                // Left/Right projection -> Use Z and Y
+                uAxis = 2; vAxis = 1;
+            } else {
+                // Front/Back projection -> Use X and Y
+                uAxis = 0; vAxis = 1;
+            }
+
+            let minU = Infinity, minV = Infinity, maxU = -Infinity, maxV = -Infinity;
+            const projected = points.map(p => {
+                const u = p[uAxis];
+                const v = p[vAxis];
+                if(u < minU) minU = u; if(u > maxU) maxU = u;
+                if(v < minV) minV = v; if(v > maxV) maxV = v;
+                return [u, v];
+            });
+            
+            // Note: We don't normalize to 0,0 here because we want to preserve 
+            // the relative spacing of faces within a merged group.
+            // We return the raw projected coordinates.
+            return { uvs: projected, minU, minV, maxU, maxV, w: maxU-minU, h: maxV-minV };
         }
 
-        // --- DRAG INTERACTION ---
-        dom.canvas.addEventListener('mousedown', startDrag);
-        dom.canvas.addEventListener('touchstart', startDrag, {passive: false});
 
-        window.addEventListener('mousemove', doDrag);
-        window.addEventListener('touchmove', doDrag, {passive: false});
+        // --- CORE: AUTO LAYOUT GENERATOR ---
+        function generateLayout(jsonData) {
+            log("Generating Connected Wireframe Layout...");
+            let geometries = [];
+            
+            if (Array.isArray(jsonData["minecraft:geometry"])) {
+                geometries = jsonData["minecraft:geometry"];
+            } else if (typeof jsonData["minecraft:geometry"] === 'object') {
+                geometries = [jsonData["minecraft:geometry"]];
+            } else {
+                Object.keys(jsonData).forEach(k => {
+                    if(k.startsWith("geometry.")) geometries.push(jsonData[k]);
+                });
+            }
 
-        window.addEventListener('mouseup', endDrag);
-        window.addEventListener('touchend', endDrag);
+            if (geometries.length === 0) {
+                log("Error: No geometries found.");
+                return jsonData;
+            }
+            
+            // Pick biggest geometry
+            let bestGeoIndex = 0;
+            let maxScore = -1;
+            geometries.forEach((g, idx) => {
+                let score = 0;
+                if(g.bones) {
+                    score += g.bones.length;
+                    g.bones.forEach(b => {
+                        if(b.cubes) score += b.cubes.length * 10;
+                        if(b.poly_mesh) score += 50;
+                    });
+                }
+                if(score > maxScore) { maxScore = score; bestGeoIndex = idx; }
+            });
+            
+            appState.activeGeoIndex = bestGeoIndex;
+            const geo = geometries[bestGeoIndex];
+            
+            const targetRes = parseInt(dom.inputs.targetRes.value);
+            // DRAMATICALLY REDUCED PADDING to fix the "dots" issue
+            const padding = 2 * (targetRes / 2048); 
 
-        function startDrag(e) {
-            if (!appState.fileContent) return;
-            appState.isDragging = true;
-            const pt = getEventPoint(e);
-            appState.lastMouse = pt;
-            dom.canvas.style.cursor = 'grabbing';
+            let islands = [];
+            let totalArea = 0;
+            let maxIslandW = 0; 
+            let maxIslandH = 0;
+
+            if (geo.bones) {
+                geo.bones.forEach(b => {
+                    // --- CUBES ---
+                    if (b.cubes) {
+                        b.cubes.forEach((c) => {
+                            const w = parseFloat(c.size[0]) || 0;
+                            const h = parseFloat(c.size[1]) || 0;
+                            const d = parseFloat(c.size[2]) || 0;
+                            
+                            const faces = [
+                                { name: 'north', w: w, h: h }, { name: 'south', w: w, h: h },
+                                { name: 'east',  w: d, h: h }, { name: 'west',  w: d, h: h },
+                                { name: 'up',    w: w, h: d }, { name: 'down',  w: w, h: d }
+                            ];
+
+                            let validFaces = 0;
+                            faces.forEach(f => {
+                                if (f.w > 0 && f.h > 0) {
+                                    islands.push({ type: 'cube_face', cube: c, faceName: f.name, rawW: f.w, rawH: f.h });
+                                    totalArea += f.w * f.h;
+                                    maxIslandW = Math.max(maxIslandW, f.w);
+                                    maxIslandH = Math.max(maxIslandH, f.h);
+                                    validFaces++;
+                                }
+                            });
+                            if(validFaces > 0) c.uv = {}; 
+                        });
+                    }
+
+                    // --- MESHES ---
+                    if (b.poly_mesh) {
+                        const mesh = b.poly_mesh;
+                        mesh.uvs = []; 
+                        mesh.normalized_uvs = false; 
+
+                        if(mesh.polys && mesh.positions) {
+                            
+                            // 1. Prepare all faces with data
+                            let faces = mesh.polys.map((poly, pIdx) => {
+                                let vIndices = Array.isArray(poly) ? (Array.isArray(poly[0]) ? poly.map(p=>p[0]) : poly) : [];
+                                const points = vIndices.map(vi => mesh.positions[vi]);
+                                const normal = getNormal(points);
+                                return { poly, pIdx, points, normal, processed: false };
+                            });
+
+                            // 2. MERGE ADJACENT/SIMILAR FACES
+                            // Simple run-length clustering by normal similarity
+                            // This reconstructs the "grid" look for tessellated surfaces
+                            
+                            let currentGroup = [];
+                            let lastNormal = null;
+                            
+                            for(let i=0; i<faces.length; i++) {
+                                const f = faces[i];
+                                let shouldMerge = false;
+                                
+                                if (lastNormal) {
+                                    const dot = f.normal[0]*lastNormal[0] + f.normal[1]*lastNormal[1] + f.normal[2]*lastNormal[2];
+                                    if (dot > 0.9) shouldMerge = true; // Merge if pointing same direction
+                                }
+
+                                if(shouldMerge) {
+                                    currentGroup.push(f);
+                                } else {
+                                    // Finish previous group
+                                    if(currentGroup.length > 0) createMeshIsland(currentGroup, mesh, islands);
+                                    // Start new
+                                    currentGroup = [f];
+                                    lastNormal = f.normal;
+                                }
+                            }
+                            // Finish last group
+                            if(currentGroup.length > 0) createMeshIsland(currentGroup, mesh, islands);
+                        }
+                    }
+                });
+            }
+            
+            // Helper to finalize a merged mesh island
+            function createMeshIsland(group, mesh, islandList) {
+                // Project all faces in group to the same plane based on the first face's normal
+                // This preserves their relative grid positions!
+                const refNormal = group[0].normal;
+                
+                // Calculate bounds of the entire group
+                let grpMinU = Infinity, grpMinV = Infinity, grpMaxU = -Infinity, grpMaxV = -Infinity;
+                
+                const processedFaces = group.map(f => {
+                    const proj = projectToPlane(f.points, refNormal);
+                    if(proj.minU < grpMinU) grpMinU = proj.minU;
+                    if(proj.minV < grpMinV) grpMinV = proj.minV;
+                    if(proj.maxU > grpMaxU) grpMaxU = proj.maxU;
+                    if(proj.maxV > grpMaxV) grpMaxV = proj.maxV;
+                    return { ...f, localUVs: proj.uvs };
+                });
+                
+                const w = grpMaxU - grpMinU;
+                const h = grpMaxV - grpMinV;
+                
+                // Normalize group to 0,0
+                processedFaces.forEach(f => {
+                    f.localUVs = f.localUVs.map(uv => [uv[0] - grpMinU, uv[1] - grpMinV]);
+                });
+
+                islandList.push({
+                    type: 'mesh_group',
+                    mesh: mesh,
+                    faces: processedFaces,
+                    rawW: w,
+                    rawH: h
+                });
+                
+                totalArea += w * h;
+                maxIslandW = Math.max(maxIslandW, w);
+                maxIslandH = Math.max(maxIslandH, h);
+            }
+            
+            if (islands.length === 0) return jsonData;
+
+            // --- SCALING ---
+            const targetArea = targetRes * targetRes;
+            const fillRate = 0.85; // Higher fill rate for efficiency
+            
+            // Scale Calculation
+            let areaScale = totalArea > 0 ? Math.sqrt( (targetArea * fillRate) / totalArea ) : 1;
+            
+            // Clamp scale to fit largest island
+            const safeRes = targetRes - (padding * 2);
+            const maxFitScale = safeRes / Math.max(maxIslandW, maxIslandH, 0.001);
+            
+            let currentScale = Math.min(areaScale, maxFitScale);
+            if(!isFinite(currentScale) || currentScale <= 0) currentScale = 1;
+            currentScale *= appState.contentScale;
+            
+            log(`Packed ${islands.length} islands (was ${geo.bones?.reduce((a,b)=>a+(b.poly_mesh?.polys?.length||0),0)} polys). Scale: ${currentScale.toFixed(2)}`);
+
+            // --- PACKING (Standard BLF) ---
+            let packed = false;
+            let attempts = 0;
+            let finalPlacements = []; 
+            let maxUsedX = 0, maxUsedY = 0;
+
+            islands.sort((a, b) => b.rawH - a.rawH); 
+
+            while (!packed && attempts < 50) {
+                let currentX = padding;
+                let currentY = padding;
+                let rowHeight = 0;
+                let fit = true;
+                finalPlacements = [];
+                maxUsedX = 0; maxUsedY = 0;
+
+                for (let island of islands) {
+                    const w = island.rawW * currentScale;
+                    const h = island.rawH * currentScale;
+                    
+                    if (w > targetRes - padding*2 || h > targetRes - padding*2) { fit = false; break; }
+
+                    if (currentX + w > targetRes - padding) {
+                        currentX = padding;
+                        currentY += rowHeight + padding;
+                        rowHeight = 0;
+                    }
+                    if (currentY + h > targetRes - padding) { fit = false; break; }
+
+                    finalPlacements.push({ island: island, x: currentX, y: currentY, w: w, h: h });
+                    maxUsedX = Math.max(maxUsedX, currentX + w);
+                    maxUsedY = Math.max(maxUsedY, currentY + h);
+                    rowHeight = Math.max(rowHeight, h);
+                    currentX += w + padding;
+                }
+
+                if (fit) packed = true;
+                else { currentScale *= 0.95; attempts++; }
+            }
+            
+            // --- APPLYING UVs ---
+            const shiftX = (targetRes - (maxUsedX - padding)) / 2 - padding;
+            const shiftY = (targetRes - (maxUsedY - padding)) / 2 - padding;
+
+            finalPlacements.forEach(p => {
+                const x = p.x + shiftX;
+                const y = p.y + shiftY;
+                const island = p.island;
+
+                if (island.type === 'cube_face') {
+                    if (!island.cube.uv) island.cube.uv = {}; 
+                    island.cube.uv[island.faceName] = {
+                        uv: [x, y],
+                        uv_size: [p.w, p.h]
+                    };
+                }
+                else if (island.type === 'mesh_group') {
+                    const mesh = island.mesh;
+                    
+                    island.faces.forEach(faceData => {
+                        const startUVIndex = mesh.uvs.length;
+                        
+                        // Transform Local UVs to Global Canvas UVs
+                        faceData.localUVs.forEach(luv => {
+                            const finalU = x + (luv[0] * currentScale);
+                            const finalV = y + (luv[1] * currentScale);
+                            mesh.uvs.push([finalU, finalV]);
+                        });
+
+                        // Update Poly Indices
+                        let indices = Array.isArray(faceData.poly) ? faceData.poly : [];
+                        for(let i=0; i<indices.length; i++) {
+                            const newUVIndex = startUVIndex + i;
+                            if(Array.isArray(indices[i])) {
+                                if(indices[i].length >= 3) indices[i][2] = newUVIndex;
+                                else if(indices[i].length === 2) indices[i][1] = newUVIndex;
+                            } else {
+                                indices[i] = [indices[i], newUVIndex]; 
+                            }
+                        }
+                    });
+                }
+            });
+
+            geo.description.texture_width = targetRes;
+            geo.description.texture_height = targetRes;
+
+            return jsonData;
         }
 
-        function doDrag(e) {
-            if (!appState.isDragging) return;
+        // --- ZOOM & PAN ---
+        dom.container.addEventListener('wheel', handleWheel, { passive: false });
+        function handleWheel(e) {
+            if (!appState.activeJson) return;
             e.preventDefault();
-            
-            const pt = getEventPoint(e);
-            const dx = pt.x - appState.lastMouse.x;
-            const dy = pt.y - appState.lastMouse.y;
-            
-            // Convert pixel delta to percentage of canvas size
+            const currentZoom = parseFloat(dom.inputs.manualScale.value);
+            const zoomFactor = Math.exp(e.deltaY * -0.001); 
+            let newZoom = Math.max(0.1, Math.min(5.0, currentZoom * zoomFactor));
+
             const rect = dom.canvas.getBoundingClientRect();
-            
-            appState.offsetX += dx / rect.width;
-            appState.offsetY += dy / rect.height;
-            
-            appState.lastMouse = pt;
-            
-            updateOffsetDisplays();
+            const mouseX = e.clientX - rect.left - rect.width / 2;
+            const mouseY = e.clientY - rect.top - rect.height / 2;
+
+            const worldX = (mouseX - appState.viewX) / currentZoom;
+            const worldY = (mouseY - appState.viewY) / currentZoom;
+
+            appState.scale = newZoom;
+            dom.inputs.manualScale.value = newZoom.toFixed(2);
+            updateViewScale();
+
+            appState.viewX = mouseX - (worldX * newZoom);
+            appState.viewY = mouseY - (worldY * newZoom);
             requestRedraw();
         }
 
-        function endDrag() {
-            appState.isDragging = false;
-            dom.canvas.style.cursor = 'grab';
+        function autoFitView() {
+            if (!appState.activeJson) return;
+            const targetRes = parseInt(dom.inputs.targetRes.value);
+            const screenW = dom.canvas.width;
+            const screenH = dom.canvas.height;
+            const padding = 50;
+            
+            let fitScale = Math.min((screenW - padding*2)/targetRes, (screenH - padding*2)/targetRes);
+            if(fitScale <= 0 || !isFinite(fitScale)) fitScale = 1.0;
+
+            appState.scale = fitScale;
+            appState.viewX = -(targetRes / 2) * fitScale;
+            appState.viewY = -(targetRes / 2) * fitScale;
+
+            dom.inputs.manualScale.value = fitScale.toFixed(2);
+            updateViewScale();
+            requestRedraw();
         }
 
-        function getEventPoint(e) {
-            if (e.touches && e.touches.length > 0) {
-                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            }
-            return { x: e.clientX, y: e.clientY };
-        }
+        // --- DRAG ---
+        dom.canvas.addEventListener('mousedown', e => {
+            if (!appState.activeJson) return;
+            e.preventDefault(); 
+            appState.isDragging = true;
+            appState.lastMouse = { x: e.clientX, y: e.clientY };
+            dom.canvas.style.cursor = 'grabbing';
+        });
+        window.addEventListener('mousemove', e => {
+            if (!appState.isDragging) return;
+            e.preventDefault();
+            const dx = e.clientX - appState.lastMouse.x;
+            const dy = e.clientY - appState.lastMouse.y;
+            appState.viewX += dx;
+            appState.viewY += dy;
+            appState.lastMouse = { x: e.clientX, y: e.clientY };
+            requestRedraw();
+        });
+        window.addEventListener('mouseup', () => { appState.isDragging = false; dom.canvas.style.cursor = 'grab'; });
 
-
-        // --- FILE HANDLING ---
+        // --- FILE ---
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             document.getElementById('fileNameDisplay').textContent = file.name;
             appState.fileName = file.name;
-            
             const reader = new FileReader();
             reader.onload = (e) => processFile(e.target.result);
             reader.readAsText(file);
         }
 
         function processFile(content) {
-            appState.fileContent = content;
-            clearLog();
-            
             try {
+                clearLog();
                 const json = JSON.parse(content);
-                
-                if (json["minecraft:geometry"]) {
+                if (json["minecraft:geometry"] || json["geometry.model"]) {
                     appState.fileType = 'bedrock';
-                    const geo = json["minecraft:geometry"][0];
-                    
-                    const headerW = geo.description.texture_width || 16;
-                    const headerH = geo.description.texture_height || 16;
-
-                    // --- INITIAL SETUP ---
-                    log(`File Header: ${headerW}x${headerH}`);
-                    log(`Loaded. No auto-scale. Drag/Scale manually.`);
-
-                    // Set State & Inputs
-                    appState.sourceRes.w = headerW;
-                    appState.sourceRes.h = headerH;
-                    
-                    // Defaults: RAW (No divide by 2, No offset)
-                    appState.offsetX = 0.0;
-                    appState.offsetY = 0.0; 
-
-                    dom.inputs.srcW.value = headerW;
-                    dom.inputs.srcH.value = headerH;
-                    dom.inputs.manualScale.value = "1.0"; 
-
-                    // Update UI
+                    appState.originalJson = json; 
+                    regenerateLayout();
                     updateUIState(true);
-                    updateScaleDisplay();
-                    updateOffsetDisplays();
-                    document.getElementById('fileResVal').textContent = `${headerW}x${headerH}`;
-                    
-                    drawPreview();
                 } else {
-                    throw new Error("Invalid Bedrock file.");
+                    throw new Error("Invalid/Unknown file format.");
                 }
             } catch (e) {
-                log(`Error: ${e.message}`);
-                console.error(e);
+                log("Error: " + e.message);
                 updateUIState(false);
             }
         }
 
+        function regenerateLayout() {
+            if(!appState.originalJson) return;
+            const freshCopy = JSON.parse(JSON.stringify(appState.originalJson));
+            appState.activeJson = generateLayout(freshCopy);
+            
+            const targetRes = parseInt(dom.inputs.targetRes.value);
+            appState.sourceRes = { w: targetRes, h: targetRes };
+            document.getElementById('fileResVal').textContent = `${targetRes}x${targetRes}`;
+            
+            resizeCanvas();
+            autoFitView();
+        }
+
         function updateUIState(isValid) {
             const { action, fileInfo, placeholder } = dom.panels;
-            
             if(isValid) {
                 action.classList.remove('opacity-50', 'pointer-events-none');
                 fileInfo.classList.remove('hidden');
                 placeholder.style.display = 'none';
                 dom.status.textContent = "Ready";
                 dom.status.className = "px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-green-500 bg-green-900/30 rounded border border-green-800";
-                
-                document.getElementById('fileTypeVal').textContent = appState.fileType;
             } else {
                 action.classList.add('opacity-50', 'pointer-events-none');
                 fileInfo.classList.add('hidden');
@@ -375,85 +691,62 @@
             }
         }
 
-        function requestRedraw() {
-            if(appState.fileContent) drawPreview();
-        }
+        function requestRedraw() { if(appState.activeJson) drawPreview(); }
 
-        // ==========================================
-        // DRAW PREVIEW
-        // ==========================================
+        // --- DRAW ---
         function drawPreview() {
-            const data = JSON.parse(appState.fileContent);
-            const geo = data["minecraft:geometry"][0];
-            
-            const srcW = parseInt(dom.inputs.srcW.value) || 16;
-            const srcH = parseInt(dom.inputs.srcH.value) || 16;
+            let geo = null;
+            const json = appState.activeJson;
+            if(Array.isArray(json["minecraft:geometry"])) geo = json["minecraft:geometry"][appState.activeGeoIndex];
+            else if(typeof json["minecraft:geometry"] === 'object') geo = json["minecraft:geometry"];
+            if(!geo) return;
 
-            const previewScale = Math.max(2, 1024 / srcW);
-            const width = srcW * previewScale;
-            const height = srcH * previewScale;
+            const ctx = dom.ctx;
+            const w = dom.canvas.width;
+            const h = dom.canvas.height;
             
-            dom.canvas.width = width;
-            dom.canvas.height = height;
-            dom.ctx.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, w, h);
+            ctx.save();
+            ctx.translate(w / 2, h / 2);
+            ctx.translate(appState.viewX, appState.viewY);
+            
+            const zoom = parseFloat(dom.inputs.manualScale.value); 
+            ctx.scale(zoom, zoom);
 
-            // MATH: 
-            // 1. Base Scale = Preview / Source (Standard 1:1)
-            // 2. User Multiplier
-            const manualMult = parseFloat(dom.inputs.manualScale.value);
-            const finalScaleX = previewScale * manualMult;
-            const finalScaleY = previewScale * manualMult;
+            const dim = appState.sourceRes.w;
             
-            // OFFSETS (Pixels)
-            const offX = width * appState.offsetX;
-            const offY = height * appState.offsetY;
+            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+            ctx.fillRect(0, 0, dim, dim);
+            ctx.strokeStyle = "#4ade80"; 
+            ctx.lineWidth = 2 / zoom; 
+            ctx.setLineDash([10, 10]);
+            ctx.strokeRect(0, 0, dim, dim);
+            ctx.setLineDash([]);
+
+            let lw = parseFloat(dom.inputs.lineWidthMult.value) / zoom;
+            if(lw * zoom < 1) lw = 1 / zoom; 
 
             const settings = {
-                scaleX: finalScaleX,
-                scaleY: finalScaleY,
-                targetH: height,
-                offX: offX,
-                offY: offY,
+                scaleX: 1, scaleY: 1, targetH: dim,
                 flipV: dom.inputs.flip.checked,
                 color: dom.inputs.color.value,
-                lineWidth: 1 * parseFloat(dom.inputs.lineWidthMult.value),
-                isExport: false,
-                origW: srcW, 
-                origH: srcH,
-                fillBg: false
+                lineWidth: lw,
+                isExport: false
             };
 
-            processGeometry(dom.ctx, geo, settings);
+            processGeometry(ctx, geo, settings);
+            ctx.restore();
         }
 
-        // ==========================================
-        // GENERATE
-        // ==========================================
-        function generateSmartWireframe() {
-            log("Generating Assets...");
-            const data = JSON.parse(appState.fileContent);
-            const geo = data["minecraft:geometry"][0];
-
+        // --- EXPORT ---
+        function downloadFiles() {
+            log("Preparing Download...");
+            const data = appState.activeJson;
             const targetRes = parseInt(dom.inputs.targetRes.value);
-            const srcW = parseInt(dom.inputs.srcW.value) || 16;
-            const srcH = parseInt(dom.inputs.srcH.value) || 16;
             
-            // MATH: 
-            // 1. Base Scale = Target / Source (Standard 1:1)
-            // 2. User Multiplier
-            const manualMult = parseFloat(dom.inputs.manualScale.value);
-            const scaleX = (targetRes / srcW) * manualMult;
-            const scaleY = (targetRes / srcH) * manualMult;
-            
-            // OFFSETS (Pixels relative to Target)
-            const offX = targetRes * appState.offsetX;
-            const offY = targetRes * appState.offsetY;
-
-            log(`Target: ${targetRes}x${targetRes} | Source: ${srcW}x${srcH}`);
-            log(`Multiplier: ${manualMult.toFixed(2)}x | Offsets: ${appState.offsetX.toFixed(2)}, ${appState.offsetY.toFixed(2)}`);
-
-            geo.description.texture_width = targetRes;
-            geo.description.texture_height = targetRes;
+            let geo = null;
+            if(Array.isArray(data["minecraft:geometry"])) geo = data["minecraft:geometry"][appState.activeGeoIndex];
+            else geo = data["minecraft:geometry"];
 
             dom.hrCanvas.width = targetRes;
             dom.hrCanvas.height = targetRes;
@@ -467,191 +760,31 @@
                 dom.hrCtx.globalAlpha = 1.0;
             }
 
-            const baseWidth = Math.max(1, targetRes / 2000); 
-            const finalWidth = baseWidth * parseFloat(dom.inputs.lineWidthMult.value);
+            const finalWidth = Math.max(1, targetRes / 2000) * parseFloat(dom.inputs.lineWidthMult.value);
 
             const settings = {
-                scaleX: scaleX,
-                scaleY: scaleY,
-                targetH: targetRes,
-                offX: offX,
-                offY: offY,
+                scaleX: 1, scaleY: 1, targetH: targetRes,
                 flipV: dom.inputs.flip.checked,
                 color: dom.inputs.color.value,
                 lineWidth: finalWidth,
-                isExport: true,
-                origW: srcW,
-                origH: srcH
+                isExport: true
             };
 
             processGeometry(dom.hrCtx, geo, settings);
-            downloadFiles(dom.hrCanvas, data);
-        }
 
-        // ==========================================
-        // PROCESSING LOGIC
-        // ==========================================
-        function processGeometry(ctx, geo, s) {
-            ctx.strokeStyle = s.color;
-            ctx.lineWidth = s.lineWidth;
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            
-            if(!geo.bones) return;
-
-            geo.bones.forEach(bone => {
-                if(bone.cubes) bone.cubes.forEach(cube => processCube(ctx, cube, s));
-                if(bone.poly_mesh) processMesh(ctx, bone.poly_mesh, s);
-            });
-        }
-
-        function processCube(ctx, cube, s) {
-            if (Array.isArray(cube.uv)) {
-                // BOX UV
-                const [u, v] = cube.uv;
-                const [w, h, d] = cube.size;
-                const faces = [
-                    [u + d, v + d, w, h], [u + d + w + d, v + d, w, h],
-                    [u, v + d, d, h], [u + d + w, v + d, d, h],    
-                    [u + d, v, w, d], [u + d + w, v, w, d]         
-                ];
-
-                faces.forEach(face => drawRect(ctx, face[0], face[1], face[2], face[3], s));
-
-                if(s.isExport) {
-                    cube.uv[0] *= s.scaleX;
-                    cube.uv[1] *= s.scaleY;
-                    
-                    // Apply Offsets
-                    cube.uv[0] += s.offX;
-                    cube.uv[1] += s.offY;
-
-                    if(s.flipV) {
-                        const totalLayoutHeight = d + h;
-                        cube.uv[1] = s.targetH - cube.uv[1] - (totalLayoutHeight * s.scaleY);
-                    }
-                }
-
-            } else if (typeof cube.uv === 'object') {
-                // PER-FACE UV
-                Object.values(cube.uv).forEach(faceData => {
-                    if(faceData.uv) {
-                        const [u, v] = faceData.uv;
-                        const [w, h] = faceData.uv_size || [0, 0];
-                        drawRect(ctx, u, v, w, h, s);
-
-                        if(s.isExport) {
-                            faceData.uv[0] *= s.scaleX;
-                            let newV = v * s.scaleY;
-                            
-                            // Apply Offsets
-                            faceData.uv[0] = (faceData.uv[0] * s.scaleX) + s.offX;
-                            newV = (v * s.scaleY) + s.offY;
-
-                            if(s.flipV) {
-                                faceData.uv[1] = s.targetH - newV - (h * s.scaleY); 
-                            } else {
-                                faceData.uv[1] = newV;
-                            }
-
-                            if(faceData.uv_size) {
-                                faceData.uv_size[0] *= s.scaleX;
-                                faceData.uv_size[1] *= s.scaleY;
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        function processMesh(ctx, mesh, s) {
-            if (!mesh.polys || !mesh.uvs) return;
-            
-            const isNormalized = mesh.normalized_uvs === true;
-            
-            const transformedUVs = mesh.uvs.map(uv => {
-                let u = uv[0];
-                let v = uv[1];
-
-                if (isNormalized) {
-                    u = u * s.origW;
-                    v = v * s.origH;
-                }
-
-                let finalX = u * s.scaleX;
-                let finalY = v * s.scaleY;
-
-                // Apply Offsets
-                finalX += s.offX;
-                finalY += s.offY;
-
-                if(s.flipV && s.isExport) {
-                    finalY = s.targetH - finalY;
-                }
-
-                return [finalX, finalY];
-            });
-
-            ctx.beginPath();
-            mesh.polys.forEach(poly => {
-                const indices = Array.isArray(poly) ? poly : (poly.indices || []);
-                let first = true;
-                indices.forEach(idxData => {
-                    const uvIdx = Array.isArray(idxData) ? idxData[2] : idxData;
-                    if(transformedUVs[uvIdx]) {
-                        let [x, y] = transformedUVs[uvIdx];
-                        
-                        // Apply Preview Flip manually if not export
-                        if(!s.isExport && s.flipV) y = s.targetH - y;
-                        
-                        if(first) { ctx.moveTo(x, y); first = false; }
-                        else { ctx.lineTo(x, y); }
-                    }
-                });
-                ctx.closePath();
-            });
-            ctx.stroke();
-
-            if(s.isExport) {
-                mesh.normalized_uvs = false;
-                mesh.uvs = transformedUVs;
-            }
-        }
-
-        function drawRect(ctx, u, v, w, h, s) {
-            let x = u * s.scaleX;
-            let y = v * s.scaleY;
-            let width = w * s.scaleX;
-            let height = h * s.scaleY;
-
-            // Apply Offsets
-            x += s.offX;
-            y += s.offY;
-
-            // Apply Preview Flip
-            if(s.flipV) y = s.targetH - y - height; 
-
-            ctx.strokeRect(x, y, width, height);
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + width, y + height);
-            ctx.stroke();
-        }
-
-        function downloadFiles(canvas, jsonData) {
             const linkImg = document.createElement('a');
             linkImg.download = 'smart_wireframe.png';
-            linkImg.href = canvas.toDataURL('image/png');
+            linkImg.href = dom.hrCanvas.toDataURL('image/png');
             document.body.appendChild(linkImg);
             linkImg.click();
             document.body.removeChild(linkImg);
 
             setTimeout(() => {
-                const jsonString = JSON.stringify(jsonData, null, 2); 
+                const jsonString = JSON.stringify(data, null, 2); 
                 const blob = new Blob([jsonString], {type: "application/json"});
                 const linkModel = document.createElement('a');
                 linkModel.href = URL.createObjectURL(blob);
-                linkModel.download = appState.fileName.replace('.json', '').replace('.txt', '') + "_smart.geo.json";
+                linkModel.download = appState.fileName.replace('.json', '').replace('.txt', '') + "_repacked.geo.json";
                 document.body.appendChild(linkModel);
                 linkModel.click();
                 document.body.removeChild(linkModel);
@@ -659,6 +792,113 @@
             }, 500);
         }
 
+        function processGeometry(ctx, geo, s) {
+            ctx.strokeStyle = s.color;
+            ctx.lineWidth = s.lineWidth;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.globalAlpha = 1.0;
+            
+            let cubesDrawn = 0;
+            let meshesDrawn = 0;
+            
+            if(!geo.bones) return;
+            geo.bones.forEach(bone => {
+                if(bone.cubes) {
+                    bone.cubes.forEach(cube => {
+                        processCube(ctx, cube, s);
+                        cubesDrawn++;
+                    });
+                }
+                if(bone.poly_mesh) {
+                    processMesh(ctx, bone.poly_mesh, s);
+                    meshesDrawn++;
+                }
+            });
+            if(s.isExport === false) log(`Drawing ${cubesDrawn} Cubes, ${meshesDrawn} Meshes`);
+        }
+
+        function processCube(ctx, cube, s) {
+            if (typeof cube.uv === 'object' && !Array.isArray(cube.uv)) {
+                Object.values(cube.uv).forEach(faceData => {
+                    if(faceData.uv) {
+                        const [u, v] = faceData.uv;
+                        const [w, h] = faceData.uv_size || [0, 0];
+                        drawRect(ctx, u, v, w, h, s);
+                    }
+                });
+            } else if (Array.isArray(cube.uv)) {
+                const [u, v] = cube.uv;
+                const [w, h, d] = cube.size;
+                const faces = [
+                    [u + d, v + d, w, h], [u + d + w + d, v + d, w, h],
+                    [u, v + d, d, h], [u + d + w, v + d, d, h],    
+                    [u + d, v, w, d], [u + d + w, v, w, d]         
+                ];
+                faces.forEach(face => drawRect(ctx, face[0], face[1], face[2], face[3], s));
+            }
+        }
+
+        function processMesh(ctx, mesh, s) {
+            if (!mesh.polys || !mesh.uvs) return;
+            
+            const BATCH_SIZE = 500;
+            const polys = mesh.polys;
+            
+            // Note: generateLayout now updates mesh.uvs with absolute coordinates
+            const transformedUVs = mesh.uvs.map(uv => {
+                let u = uv[0], v = uv[1];
+                let finalX = u;
+                let finalY = v;
+                if(s.flipV) finalY = s.targetH - finalY;
+                return [finalX, finalY];
+            });
+
+            for (let i = 0; i < polys.length; i += BATCH_SIZE) {
+                ctx.beginPath();
+                const chunk = polys.slice(i, i + BATCH_SIZE);
+                
+                chunk.forEach(poly => {
+                    const indices = Array.isArray(poly) ? poly : (poly.indices || []);
+                    let first = true;
+                    let startX, startY;
+                    
+                    indices.forEach((idxData, vIndex) => {
+                        let uvIdx;
+                        if (Array.isArray(idxData)) {
+                            // Format: [v_idx, n_idx, uv_idx] OR [v_idx, uv_idx]
+                            // The UV index is always the last element
+                            if(idxData.length >= 3) uvIdx = idxData[2];
+                            else if(idxData.length === 2) uvIdx = idxData[1];
+                        } else {
+                            uvIdx = idxData; 
+                        }
+
+                        if(transformedUVs[uvIdx]) {
+                            let [x, y] = transformedUVs[uvIdx];
+                            if(first) { 
+                                ctx.moveTo(x, y); 
+                                startX = x; startY = y;
+                                first = false; 
+                            }
+                            else { ctx.lineTo(x, y); }
+                        }
+                    });
+                    if(!first && startX !== undefined) ctx.lineTo(startX, startY); // Close loop
+                });
+                ctx.stroke();
+            }
+        }
+
+        function drawRect(ctx, u, v, w, h, s) {
+            let x = u;
+            let y = v;
+            if(s.flipV) y = s.targetH - y - h; 
+            
+            if(!isFinite(x) || !isFinite(y) || !isFinite(w) || !isFinite(h)) return;
+
+            ctx.strokeRect(x, y, w, h);
+        }
     </script>
 </body>
 </html>
